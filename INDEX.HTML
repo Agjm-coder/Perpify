@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prepify | Be Ready. Always.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-primary: #c94f7c;
+            --pink-light: #ffe6ec;
+            --bg-soft: #fff5f8;
+            --text-dark: #3d2b26;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--white);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 8%;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: var(--pink-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--pink-primary); }
+
+        .cart-trigger {
+            position: relative;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        #cart-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--pink-primary);
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+
+        /* View Management */
+        .view { display: none; min-height: 80vh; animation: fadeIn 0.5s ease; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Page (Landing) */
+        .hero {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            background: linear-gradient(rgba(255,245,248,0.8), rgba(255,245,248,0.8)), 
+                        url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200');
+            background-size: cover;
+            background-position: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(40px, 8vw, 70px); color: var(--pink-primary); margin: 0; }
+        .hero p { font-size: 20px; max-width: 600px; margin: 20px 0 30px; }
+
+        .btn-main {
+            background: var(--pink-primary);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-main:hover { transform: scale(1.05); background: #b03e67; }
+
+        /* Store Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 50px 8%;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .product-card img { width: 100%; height: 250px; object-fit: cover; border-radius: 10px; }
+        .product-card h3 { margin: 15px 0 5px; }
+        .product-card .price { color: var(--pink-primary); font-weight: bold; font-size: 20px; display: block; margin-bottom: 15px; }
+
+        .btn-add {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--pink-primary);
+            background: transparent;
+            color: var(--pink-primary);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-add:hover { background: var(--pink-primary); color: white; }
+
+        /* Cart Sidebar */
+        #cart-sidebar {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 350px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            z-index: 2000;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #cart-sidebar.open { right: 0; }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .cart-items { flex-grow: 1; overflow-y: auto; margin: 20px 0; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; font-size: 14px; }
+
+        /* Auth Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+
+        footer { background: var(--bg-soft); padding: 50px 8%; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a onclick="showView('home')" class="logo"><i class="fas fa-briefcase-medical"></i> Prepify</a>
+    <div class="nav-links">
+        <a onclick="showView('home')">Home</a>
+        <a onclick="showView('shop')">Shop Kits</a>
+        <a onclick="showView('about')">Our Mission</a>
+        <a onclick="openModal('authModal')">Login</a>
+        <span class="cart-trigger" onclick="toggleCart()">
+            <i class="fas fa-shopping-basket"></i>
+            <span id="cart-badge">0</span>
+        </span>
+    </div>
+</nav>
+
+<div id="home-view" class="view active">
+    <header class="hero">
+        <h1>Confidence, Curated.</h1>
+        <p>Prepify is more than a kit; it's your pocket-sized peace of mind. Designed for the modern girl who refuses to let life's little mishaps slow her down.</p>
+        <button class="btn-main" onclick="showView('shop')">Explore Collections</button>
+    </header>
+    
+    <section style="padding: 80px 8%; text-align: center; background: white;">
+        <h2>Why we exist?</h2>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; margin-top: 40px;">
+            <div style="flex: 1; min-width: 250px;">
+                <i class="fas fa-feather" style="font-size: 30px; color: var(--pink-primary);"></i>
+                <h3>Lightweight</h3>
+                <p>Designed to disappear into your favorite tote or smallest clutch.</p>
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+                <i class="fas fa-check-circle" style="font-size: 30px; color: var(--pink-primary);"></i>
+                <h3>Hand-Picked</h3>
+                <p>No fillers. Every item is tested for actual emergency utility.</p>
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+                <i class="fas fa-globe" style="font-size: 30px; color: var(--pink-primary);"></i>
+                <h3>Eco-Conscious</h3>
+                <p>We prioritize sustainable packaging and reusable components.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="shop-view" class="view">
+    <h2 style="text-align: center; margin-top: 50px; font-family: 'Playfair Display';">Choose Your Pouch</h2>
+    <div class="product-grid" id="product-container">
+        </div>
+</div>
+
+<div id="about-view" class="view">
+    <div style="max-width: 800px; margin: 80px auto; padding: 0 20px; text-align: center;">
+        <h2 style="font-family: 'Playfair Display'; font-size: 40px;">Founded by girls, for girls.</h2>
+        <p style="font-size: 18px; line-height: 1.8;">Prepify started in a college dorm room after one too many ruined presentations due to a missing safety pin. We realized that being prepared shouldn't mean carrying a bulky suitcase. We created the ultimate "just-in-case" companion that looks as good as it works.</p>
+        <img src="https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=80&w=600" style="width: 100%; border-radius: 20px; margin-top: 30px;">
+    </div>
+</div>
+
+<div id="cart-sidebar">
+    <div class="cart-header">
+        <h3>Your Pouch</h3>
+        <i class="fas fa-times" onclick="toggleCart()" style="cursor: pointer;"></i>
+    </div>
+    <div class="cart-items" id="cart-items-list">
+        <p style="text-align: center; color: #999;">Your cart is empty.</p>
+    </div>
+    <div style="border-top: 2px solid #eee; padding-top: 20px;">
+        <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 20px;">
+            <span>Total:</span>
+            <span>₹<span id="cart-total-price">0</span></span>
+        </div>
+        <button class="btn-main" style="width: 100%; margin-top: 20px;" onclick="checkout()">Checkout Now</button>
+    </div>
+</div>
+
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeModal('authModal')" style="float:right; cursor:pointer;">&times;</span>
+        <div id="login-fields">
+            <h2>Welcome Back</h2>
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+            <button class="btn-main" style="width:100%" onclick="alert('Logged In!')">Login</button>
+            <p onclick="toggleAuth()" style="cursor:pointer; color:var(--pink-primary); margin-top:15px;">New? Create Account</p>
+        </div>
+        <div id="signup-fields" style="display:none">
+            <h2>Join the Club</h2>
+            <input type="text" placeholder="Full Name">
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Create Password">
+            <button class="btn-main" style="width:100%" onclick="alert('Account Created!')">Sign Up</button>
+            <p onclick="toggleAuth()" style="cursor:pointer; color:var(--pink-primary); margin-top:15px;">Have an account? Login</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="logo" style="justify-content: center; margin-bottom: 20px;">Prepify</div>
+    <p>© 2026 Prepify India. Be Ready. Always.</p>
+    <div style="font-size: 20px; margin-top: 15px; gap: 20px; display: flex; justify-content: center;">
+        <i class="fab fa-instagram"></i>
+        <i class="fab fa-twitter"></i>
+        <i class="fab fa-facebook"></i>
+    </div>
+</footer>
+
+<script>
+    const products = [
+        { id: 1, name: "The Essential Pouch", price: 1299, img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400" },
+        { id: 2, name: "The Jetsetter Mini", price: 1599, img: "https://images.unsplash.com/photo-1590330297626-d7aff25a0431?w=400" },
+        { id: 3, name: "The Glamour Kit", price: 1199, img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400" },
+        { id: 4, name: "The Safety First", price: 1899, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400" },
+        { id: 5, name: "The Sporty Pouch", price: 1399, img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400" },
+        { id: 6, name: "The Student Mini", price: 999, img: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=400" }
+    ];
+
+    let cart = [];
+
+    // View Switching Logic
+    function showView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId + '-view').classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    // Initialize Store
+    const container = document.getElementById('product-container');
+    products.forEach(p => {
+        container.innerHTML += `
+            <div class="product-card">
+                <img src="${p.img}" alt="${p.name}">
+                <h3>${p.name}</h3>
+                <span class="price">₹${p.price}</span>
+                <button class="btn-add" onclick="addToCart(${p.id})">Add to Cart</button>
+            </div>
+        `;
+    });
+
+    // Cart Functions
+    function toggleCart() { document.getElementById('cart-sidebar').classList.toggle('open'); }
+
+    function addToCart(id) {
+        const product = products.find(p => p.id === id);
+        cart.push(product);
+        updateCartUI();
+        if(!document.getElementById('cart-sidebar').classList.contains('open')) toggleCart();
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cart-items-list');
+        const badge = document.getElementById('cart-badge');
+        const totalDisp = document.getElementById('cart-total-price');
+        
+        badge.innerText = cart.length;
+        
+        if (cart.length === 0) {
+            list.innerHTML = '<p style="text-align: center; color: #999;">Your cart is empty.</p>';
+            totalDisp.innerText = "0";
+            return;
+        }
+
+        list.innerHTML = "";
+        let total = 0;
+        cart.forEach((item, index) => {
+            total += item.price;
+            list.innerHTML += `
+                <div class="cart-item">
+                    <span>${item.name}</span>
+                    <span>₹${item.price} <i class="fas fa-trash" onclick="removeFromCart(${index})" style="color:red; margin-left:10px; cursor:pointer;"></i></span>
+                </div>
+            `;
+        });
+        totalDisp.innerText = total.toLocaleString();
+    }
+
+    function checkout() {
+        if(cart.length === 0) return alert("Add some kits first!");
+        alert("Redirecting to secure payment... 🔒");
+    }
+
+    // Modal Logic
+    function openModal(id) { document.getElementById(id).style.display = 'block'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function toggleAuth() {
+        const login = document.getElementById('login-fields');
+        const signup = document.getElementById('signup-fields');
+        login.style.display = login.style.display === 'none' ? 'block' : 'none';
+        signup.style.display = signup.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+</body>
+</html>
